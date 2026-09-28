@@ -1,0 +1,29 @@
+feature/tasks.py
+  s_e6c1dd603048df::t_3374182b3967a2 1
+  s_e6c1dd603048df::t_526271354ca782 2-107
+tests/test_tasks.py
+  s_e6c1dd603048df::t_526271354ca782 2-59
+  s_e6c1dd603048df::t_3374182b3967a2 1
+app/__init__.py
+  s_e6c1dd603048df::t_64b5712924feef 15-19
+  s_e6c1dd603048df::t_3374182b3967a2 14
+feature/__init__.py
+  s_e6c1dd603048df::t_526271354ca782 2-4
+  s_e6c1dd603048df::t_3374182b3967a2 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "13095fad14a823a8c37a87b4ec50b6055d049448",
+  "prompts": {},
+  "sessions": {
+    "s_e6c1dd603048df": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3f3f3bc0-27c9-4d4d-a63b-31a255b2cc9b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Ravichandran Rajappa <ravi2chandrn@gmail.com>"
+    }
+  }
+}
