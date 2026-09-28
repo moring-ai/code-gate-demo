@@ -1,0 +1,14 @@
+feature/app.py
+  h_b3a9ab8c0841a7 1-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ce5adf09bed1b57437b312498e98883fecd626ba",
+  "prompts": {},
+  "humans": {
+    "h_b3a9ab8c0841a7": {
+      "author": "Ravichandran Rajappa <ravi2chandrn@gmail.com>"
+    }
+  }
+}
