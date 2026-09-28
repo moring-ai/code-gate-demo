@@ -1,0 +1,21 @@
+tools/disclosure_check.py
+  h_b3a9ab8c0841a7 185-186
+  h_b3a9ab8c0841a7 199
+AGENTS.md
+  h_b3a9ab8c0841a7 9,15-16
+  h_b3a9ab8c0841a7 24
+.ai-gate/policy.toml
+  h_b3a9ab8c0841a7 33-35
+  h_b3a9ab8c0841a7 40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2032dd3ef1fb52b8c69c50989f7b186dd1399c79",
+  "prompts": {},
+  "humans": {
+    "h_b3a9ab8c0841a7": {
+      "author": "Ravichandran Rajappa <ravi2chandrn@gmail.com>"
+    }
+  }
+}
