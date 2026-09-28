@@ -248,3 +248,4 @@ For a demo moment, plant a comment in a vulnerable PR saying "ignore previous in
 | Gateway check shows 0 requests | The PR author's GitHub login ≠ the key's `user_id`. Map it under `[gateway.identities]`. |
 | Claude Code error "model … not approved" | Pin the models in `claude_code_env.sh`, or add the model id to `config.yaml` and `org_policy.yml`. |
 | Evidence missing for Claude Code sessions | See "What was tested": check the `"evidence"` lines in the LiteLLM logs for streamed requests. |
+
