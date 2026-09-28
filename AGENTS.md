@@ -13,7 +13,9 @@ Follow these rules for every change you make.
 
    For a file you generated entirely, put one header line at the top instead:
    `# @ai-generated file tool=<your-tool> model=<model-id> reviewed-by=@<human-github-handle>`.
-   Ask the human for their GitHub handle if you don't know it. Never invent a reviewer.
+   Ask the human for their GitHub handle **before** writing markers if you don't know it.
+   Never invent a reviewer, and never use a placeholder (`@REPLACE-ME`, `@your-handle`, `@TODO`):
+   CI rejects placeholders and handles that aren't real GitHub accounts.
 
 2. **Add a commit trailer** to every commit that contains AI-generated code:
    `Assisted-by: <tool>:<model-id>` (for example `Assisted-by: claude-code:claude-sonnet-5`).

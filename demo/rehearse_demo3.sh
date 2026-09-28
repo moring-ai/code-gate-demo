@@ -4,6 +4,8 @@
 #   demo3/good-tags  -> complete markers, trailer, ticked checkbox                  -> passes
 set -euo pipefail
 BASE="${BASE_BRANCH:-main}"
+HANDLE="${GITHUB_HANDLE:-$(gh api user -q .login 2>/dev/null || true)}"
+: "${HANDLE:?set GITHUB_HANDLE=<your GitHub username> (or log in with gh auth login)}"
 git fetch -q origin "$BASE"
 
 git checkout -q -B demo3/bad-tags "origin/$BASE"
@@ -19,10 +21,10 @@ git add app/slugs.py && git commit -q -m "Add slugify helper" -m "Assisted-by: c
 git push -q -f origin demo3/bad-tags
 
 git checkout -q -B demo3/good-tags "origin/$BASE"
-cat > app/slugs.py <<'PY'
+cat > app/slugs.py <<PY
 import re
 
-# @ai-generated begin tool=claude-code model=claude-sonnet-5 reviewed-by=@your-handle
+# @ai-generated begin tool=claude-code model=claude-sonnet-5 reviewed-by=@${HANDLE}
 def slugify(text: str) -> str:
     text = re.sub(r"[^a-zA-Z0-9]+", "-", text.strip().lower())
     return text.strip("-")

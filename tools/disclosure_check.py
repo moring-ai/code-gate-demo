@@ -36,6 +36,25 @@ KV_RE = re.compile(r"([\w-]+)=(\S+)")
 CHECK_AI = re.compile(r"-\s*\[[xX]\]\s*This PR contains AI-generated code")
 CHECK_REVIEWED = re.compile(r"-\s*\[[xX]\]\s*I have reviewed all AI-generated code")
 BOT_HINTS = ("[bot]", "copilot", "devin", "claude", "codex", "cursor")
+PLACEHOLDER_RE = re.compile(r"(?i)^@?(replace[-_]?me|todo|tbd|fixme|your[-_]?handle|your[-_]?name|"
+                            r"username|user|reviewer|human|someone|x{2,}|none|n/?a|unknown)$")
+HANDLE_RE = re.compile(r"^@[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
+_user_exists: dict[str, bool] = {}
+
+
+def reviewer_problem(handle: str) -> str | None:
+    """Reject placeholders, malformed handles and (in CI) accounts that don't exist."""
+    if PLACEHOLDER_RE.match(handle):
+        return "is a placeholder, not a person"
+    if not HANDLE_RE.match(handle):
+        return "is not a GitHub handle (expected @username)"
+    if os.environ.get("GITHUB_TOKEN"):
+        name = handle[1:].lower()
+        if name not in _user_exists:
+            _user_exists[name] = c.gh_api("GET", f"/users/{name}") is not None
+        if not _user_exists[name]:
+            return "is not an existing GitHub account"
+    return None
 
 
 def detect_disclosure(ctx: dict, commits: list[dict], added: dict, policy: dict) -> dict:
@@ -85,6 +104,11 @@ def validate_markers(markers: list[dict], added: dict, require_reviewer: bool) -
                     problems.append(f"{loc} marker is missing `tool=`")
                 if require_reviewer and "reviewed-by" not in mk["fields"]:
                     problems.append(f"{loc} marker is missing `reviewed-by=@<human>`")
+                elif require_reviewer:
+                    who = mk["fields"]["reviewed-by"]
+                    why = reviewer_problem(who)
+                    if why:
+                        problems.append(f"{loc} reviewer `{who}` {why}")
             if mk["kind"] == "file":
                 declared += len(added.get(path, []))
             elif mk["kind"] == "begin":
