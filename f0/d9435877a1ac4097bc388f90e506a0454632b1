@@ -1,0 +1,18 @@
+AGENTS.md
+  h_b3a9ab8c0841a7 16-18
+demo/rehearse_demo3.sh
+  h_b3a9ab8c0841a7 7-8,24,27
+tools/disclosure_check.py
+  h_b3a9ab8c0841a7 39-57,107-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f0d9435877a1ac4097bc388f90e506a0454632b1",
+  "prompts": {},
+  "humans": {
+    "h_b3a9ab8c0841a7": {
+      "author": "Ravichandran Rajappa <ravi2chandrn@gmail.com>"
+    }
+  }
+}
