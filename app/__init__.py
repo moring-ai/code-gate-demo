@@ -11,4 +11,10 @@ def create_app() -> Flask:
     def health():
         return {"ok": True}
 
+    # @ai-generated begin tool=claude-code model=claude-opus-5-5 reviewed-by=@r2vichan
+    from feature import tasks_bp
+
+    app.register_blueprint(tasks_bp)
+    # @ai-generated end
+
     return app
