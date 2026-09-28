@@ -1,0 +1,54 @@
+# Demo 4: org AI usage policy, enforced by org_policy_guardrail.py (LiteLLM pre-call).
+# Start in "monitor" for a week or two, review events, then switch to "enforce".
+# ORG_POLICY_MODE env var overrides this value.
+mode: enforce          # monitor | enforce
+
+approved_models:
+  - claude-sonnet-5
+  - claude-opus-5-5
+  - claude-haiku-4-5-20251001
+  - demo-mock          # rehearsal only
+
+# User-Agent prefixes of approved AI tools.
+approved_clients:
+  - "claude-cli/"      # Claude Code
+  - "curl/"            # smoke tests and rehearsal only; remove for real use
+
+# Tool definitions and system prompts come from the client, not the user;
+# scanning them mostly produces false positives.
+scan_system_prompt: false
+
+# action: block | redact | log
+data_classes:
+  - id: private_key
+    action: block
+    pattern: '-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----'
+  - id: aws_access_key_id
+    action: redact
+    pattern: '\b(?:AKIA|ASIA)[0-9A-Z]{16}\b'
+  - id: github_token
+    action: redact
+    pattern: '\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{60,})\b'
+  - id: llm_api_key
+    action: redact
+    pattern: '\bsk-(?:ant-[a-z0-9]+-|proj-)?[A-Za-z0-9_\-]{32,}'
+  - id: slack_token
+    action: redact
+    pattern: '\bxox[abprs]-[A-Za-z0-9-]{10,}'
+  - id: secret_assignment          # password = "...", api_key: ...
+    action: redact
+    group: 1                       # redact only the value
+    pattern: '(?i)\b(?:password|passwd|secret|api[_-]?key|access[_-]?token|client[_-]?secret)\b["'']?\s*[:=]\s*["'']?([^\s"''`,;]{8,})'
+  - id: us_ssn
+    action: block
+    pattern: '\b(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}\b'
+  - id: payment_card
+    action: block
+    validator: luhn
+    pattern: '\b(?:4\d{3}|5[1-5]\d{2}|6011|3[47]\d{2})[ -]?\d{4}[ -]?\d{4}[ -]?\d{2,4}\b'
+  - id: classification_label       # uppercase labels only, to avoid matching prose
+    action: block
+    pattern: '\b(?:STRICTLY CONFIDENTIAL|CONFIDENTIAL|INTERNAL ONLY|DO NOT DISTRIBUTE)\b'
+  - id: customer_id                # example org-specific identifier
+    action: block
+    pattern: '\bCUST-\d{8}\b'

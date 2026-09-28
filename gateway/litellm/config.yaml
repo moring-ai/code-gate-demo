@@ -1,0 +1,43 @@
+# LiteLLM gateway for the AI code gate demo.
+# Approved models are also enforced by the org policy guardrail (org_policy.yml).
+model_list:
+  - model_name: claude-sonnet-5
+    litellm_params: {model: anthropic/claude-sonnet-5, api_key: os.environ/ANTHROPIC_API_KEY}
+  - model_name: claude-opus-5-5
+    litellm_params: {model: anthropic/claude-opus-5-5, api_key: os.environ/ANTHROPIC_API_KEY}
+  - model_name: claude-haiku-4-5-20251001
+    litellm_params: {model: anthropic/claude-haiku-4-5-20251001, api_key: os.environ/ANTHROPIC_API_KEY}
+
+  # Offline rehearsal model: returns canned code, needs no provider key.
+  - model_name: demo-mock
+    litellm_params:
+      model: openai/demo-mock
+      api_key: not-used
+      mock_response: |
+        Here is the search endpoint:
+        ```python
+        @bp.route("/users/search")
+        def search_users():
+            name = request.args.get("name", "")
+            conn = get_db()
+            query = f"SELECT id, name, email FROM users WHERE name LIKE '%{name}%'"
+            rows = conn.execute(query).fetchall()
+            return jsonify([{"id": r[0], "name": r[1], "email": r[2]} for r in rows])
+        ```
+
+  # Exists in the gateway but is NOT approved: used to demo model blocking.
+  - model_name: unapproved-model
+    litellm_params: {model: openai/unapproved, api_key: not-used, mock_response: "should never be returned"}
+
+litellm_settings:
+  callbacks: evidence_logger.evidence_logger
+
+guardrails:
+  - guardrail_name: org-ai-policy
+    litellm_params:
+      guardrail: org_policy_guardrail.OrgPolicyGuardrail
+      mode: pre_call
+      default_on: true
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

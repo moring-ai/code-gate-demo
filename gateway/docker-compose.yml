@@ -1,0 +1,53 @@
+# LLM gateway stack for Demos 2 and 4.
+#   cp .env.example .env   # fill in values
+#   docker compose up -d
+# Ports bind to 127.0.0.1 only. Expose ONLY the evidence API to CI (see scripts/expose_evidence_api.sh).
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: litellm
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm"]
+      interval: 5s
+      retries: 10
+
+  evidence-api:
+    build: ./evidence-api
+    environment:
+      EVIDENCE_INGEST_TOKEN: ${EVIDENCE_INGEST_TOKEN:?set in .env}
+      EVIDENCE_QUERY_TOKEN: ${EVIDENCE_QUERY_TOKEN:?set in .env}
+      EVIDENCE_DB: /data/evidence.db
+    volumes: [evidence:/data]
+    ports: ["127.0.0.1:8787:8787"]
+
+  litellm:
+    # Pinned, cosign-signed release. Never float on :latest for a component that holds provider keys.
+    # Verify: cosign verify --key https://raw.githubusercontent.com/BerriAI/litellm/0112e53046018d726492c814b3644b7d376029d0/cosign.pub ghcr.io/berriai/litellm-database:v1.99.1
+    image: ghcr.io/berriai/litellm-database:v1.99.1
+    command: ["--config", "/app/gw/config.yaml", "--port", "4000"]
+    environment:
+      DATABASE_URL: postgresql://litellm:${POSTGRES_PASSWORD}@db:5432/litellm
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?set in .env}
+      LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:?set in .env}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      EVIDENCE_API_URL: http://evidence-api:8787
+      EVIDENCE_INGEST_TOKEN: ${EVIDENCE_INGEST_TOKEN}
+      FP_HMAC_KEY: ${FP_HMAC_KEY:-}
+      FP_MODULE_DIR: /app/tools
+      ORG_POLICY_PATH: /app/gw/org_policy.yml
+      ORG_POLICY_MODE: ${ORG_POLICY_MODE:-}
+    volumes:
+      - ./litellm:/app/gw:ro
+      - ../tools:/app/tools:ro
+    ports: ["127.0.0.1:4000:4000"]
+    depends_on:
+      db: {condition: service_healthy}
+      evidence-api: {condition: service_started}
+
+volumes:
+  pgdata: {}
+  evidence: {}
