@@ -1,0 +1,26 @@
+# Keeps Git AI attribution accurate through GitHub "Squash and merge" / "Rebase and merge".
+# Equivalent to the official `git ai ci github install` workflow, with a pinned binary.
+name: Git AI (post-merge)
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  git-ai:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write   # pushes rewritten refs/notes/ai
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-git-ai
+      - name: Rewrite attribution for squash/rebase merges
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git ai ci github run

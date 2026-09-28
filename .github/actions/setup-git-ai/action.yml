@@ -1,0 +1,28 @@
+name: Set up Git AI (pinned)
+description: Install a pinned, checksum-verified git-ai binary and fetch Git AI notes.
+inputs:
+  version:
+    description: Git AI release tag
+    default: v1.7.5
+  sha256:
+    description: SHA-256 of git-ai-linux-x64 for that release
+    default: 6cf68a83cc948fbd4675e46bc5e3c50973c04257bb43a954a6712a2107206695
+runs:
+  using: composite
+  steps:
+    - name: Install git-ai ${{ inputs.version }}
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+        SHA256: ${{ inputs.sha256 }}
+      run: |
+        set -euo pipefail
+        mkdir -p "$HOME/.git-ai/bin"
+        curl -fsSL -o /tmp/git-ai "https://github.com/git-ai-project/git-ai/releases/download/${VERSION}/git-ai-linux-x64"
+        echo "${SHA256}  /tmp/git-ai" | sha256sum -c -
+        install -m 0755 /tmp/git-ai "$HOME/.git-ai/bin/git-ai"
+        echo "$HOME/.git-ai/bin" >> "$GITHUB_PATH"
+        "$HOME/.git-ai/bin/git-ai" --version
+    - name: Fetch Git AI notes (refs/notes/ai)
+      shell: bash
+      run: git fetch --no-tags origin '+refs/notes/ai:refs/notes/ai' || echo "No Git AI notes on the remote yet"

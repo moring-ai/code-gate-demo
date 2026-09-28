@@ -1,0 +1,39 @@
+# AI code gate policy. Read by tools/*.py in CI.
+# Edit thresholds here; no workflow changes needed.
+
+[gitai]
+# Demo 1: block the PR when AI-written lines exceed this share of added lines.
+max_ai_share = 50
+# If no commit in the PR carries a Git AI note: false = warn only, true = block.
+fail_on_no_attribution = false
+# A security reviewer applies this label after reviewing the AI code to unblock.
+override_label = "ai-reviewed"
+
+[gateway]
+# Demo 2: evidence from the LiteLLM gateway.
+# "report" = comment only; "enforce" = fail on the rules below.
+mode = "enforce"
+# Look for gateway activity this many hours before the PR's first commit.
+lookback_hours = 72
+# Fail if gateway-matched lines exceed this share of added lines (0 = disabled).
+max_matched_share = 0
+# Fail if at least this share of lines matches gateway output but the PR has no
+# AI disclosure (Git AI note, Assisted-by trailer, @ai-generated marker, or PR checkbox).
+undisclosed_threshold = 20
+exclude_paths = ["*.lock", "package-lock.json", "*.min.js", "*.md", "docs/*"]
+
+# Map GitHub logins to gateway user ids when they differ.
+[gateway.identities]
+# "octocat" = "octocat@example.com"
+
+[disclosure]
+# Demo 3: manual tagging conventions.
+# Trailers that count as an AI disclosure in commit messages.
+trailers = ["Assisted-by", "Co-Authored-By: Claude", "Co-authored-by: Copilot", "Generated-by"]
+# Require every @ai-generated marker to name a human reviewer.
+require_reviewed_by = true
+# Require the PR template checkbox "I reviewed all AI-generated code" when AI is declared.
+require_review_checkbox = true
+# Branch prefixes that imply an agent authored the PR.
+agent_branch_prefixes = ["claude/", "copilot/", "codex/", "cursor/", "devin/"]
+exclude_paths = ["*.lock", "package-lock.json", "*.md", "docs/*", ".ai-gate/*", "tools/*", ".github/*"]

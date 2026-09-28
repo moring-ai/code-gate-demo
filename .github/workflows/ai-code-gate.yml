@@ -1,0 +1,68 @@
+# AI code gate: three independent checks. Make each job a *required status check*
+# in branch protection (Settings > Branches) so a failing job blocks the merge.
+name: AI code gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: write   # sticky PR comments
+  issues: write          # labels
+
+concurrency:
+  group: ai-code-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # Demo 1: block when > max_ai_share of added lines are AI-written (Git AI notes).
+  gitai-attribution:
+    name: AI attribution (Git AI)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}   # HEAD must be the PR head for git-ai range stats
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-git-ai
+      - name: Git AI gate
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 tools/gitai_gate.py
+
+  # Demo 2: match PR lines against code the LLM gateway returned to the author.
+  gateway-evidence:
+    name: LLM gateway evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-git-ai   # notes are one of the disclosure signals
+      - name: Gateway evidence report
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EVIDENCE_API_URL: ${{ secrets.EVIDENCE_API_URL }}
+          EVIDENCE_QUERY_TOKEN: ${{ secrets.EVIDENCE_QUERY_TOKEN }}
+          FP_HMAC_KEY: ${{ secrets.FP_HMAC_KEY }}
+        run: python3 tools/gateway_report.py
+
+  # Demo 3: manual tagging (trailers, @ai-generated markers, PR checkbox).
+  ai-disclosure:
+    name: AI disclosure
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-git-ai   # cross-check declared vs. Git AI attribution
+      - name: Disclosure check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 tools/disclosure_check.py

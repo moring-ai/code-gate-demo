@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.db
+ai-gate-*.json
+.env
+gateway/.env
