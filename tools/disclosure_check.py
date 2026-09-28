@@ -182,7 +182,8 @@ def main() -> int:
           f"| Agent branch / bot commits | {yes if (sig['agent_branch'] or sig['bot_commits']) else no} |", ""]
     if problems:
         md += ["**Problems**", ""] + [f"- {p}" for p in problems] + [""]
-    md += ["<sub>Conventions: see `AGENTS.md`. Markers need `tool=` and `reviewed-by=@<human>`.</sub>"]
+    need = "`tool=` and `reviewed-by=@<human>`" if policy["require_reviewed_by"] else "`tool=` (the human review is the PR approval)"
+    md += [f"<sub>Conventions: see `AGENTS.md`. Markers need {need}.</sub>"]
     body = "\n".join(md)
 
     print(body)

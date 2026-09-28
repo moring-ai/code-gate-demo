@@ -30,8 +30,9 @@ exclude_paths = ["*.lock", "package-lock.json", "*.min.js", "*.md", "docs/*"]
 # Demo 3: manual tagging conventions.
 # Trailers that count as an AI disclosure in commit messages.
 trailers = ["Assisted-by", "Co-Authored-By: Claude", "Co-authored-by: Copilot", "Generated-by"]
-# Require every @ai-generated marker to name a human reviewer.
-require_reviewed_by = true
+# Who reviewed the code is recorded by the PR approval (ruleset: required approvals),
+# not inside the code. Set to true to also require reviewed-by=@handle in every marker.
+require_reviewed_by = false
 # Require the PR template checkbox "I reviewed all AI-generated code" when AI is declared.
 require_review_checkbox = true
 # Branch prefixes that imply an agent authored the PR.

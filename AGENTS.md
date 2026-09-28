@@ -6,16 +6,14 @@ Follow these rules for every change you make.
 1. **Mark generated code.** Wrap code you write in markers, using the comment syntax of the file:
 
    ```python
-   # @ai-generated begin tool=<your-tool> model=<model-id> reviewed-by=@<human-github-handle>
+   # @ai-generated begin tool=<your-tool> model=<model-id>
    ...code...
    # @ai-generated end
    ```
 
    For a file you generated entirely, put one header line at the top instead:
-   `# @ai-generated file tool=<your-tool> model=<model-id> reviewed-by=@<human-github-handle>`.
-   Ask the human for their GitHub handle **before** writing markers if you don't know it.
-   Never invent a reviewer, and never use a placeholder (`@REPLACE-ME`, `@your-handle`, `@TODO`):
-   CI rejects placeholders and handles that aren't real GitHub accounts.
+   `# @ai-generated file tool=<your-tool> model=<model-id>`.
+   Do not add a reviewer to markers. The human review is recorded by the PR approval.
 
 2. **Add a commit trailer** to every commit that contains AI-generated code:
    `Assisted-by: <tool>:<model-id>` (for example `Assisted-by: claude-code:claude-sonnet-5`).
